@@ -20871,7 +20871,7 @@ initCom(PDFViewerApplication);
   PDFPrintServiceFactory.initGlobals(PDFViewerApplication);
 }
 {
-  const HOSTED_VIEWER_ORIGINS = new Set(["https://kapil.app", "https://drive.kapil.app", "https://file.kapil.app", "https://heykapil.github.io", "https://pdf.kapil.app", "https://stream.kapil.app", "null"]);
+  const HOSTED_VIEWER_ORIGINS = new Set(["https://kapil.app", "https://drive.kapil.app", "https://file.kapil.app", "https://heykapil.github.io", "https://pdf.kapil.app", "https://stream.kapil.app", "https://s3.tebi.io", "https://cdn.kapil.app", "null"]);
   var validateFileURL = function (file) {
     if (!file) {
       return;

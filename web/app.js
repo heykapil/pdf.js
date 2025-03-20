@@ -2286,6 +2286,8 @@ if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
     "https://drive.kapil.app",
     "https://file.kapil.app",
     "https://pdf.kapil.app",
+    "https://cdn.kapil.app",
+    "https://s3.tebi.io",
     "https://stream.kapil.app"
   ]);
   // eslint-disable-next-line no-var
