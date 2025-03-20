@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Viewer Redirect</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: #fff;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+    input[type="url"] {
+      width: 100%;
+      padding: 0.5em;
+      font-size: 1em;
+      margin-bottom: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 0.6em 1.2em;
+      font-size: 1em;
+      color: #fff;
+      background: #007acc;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .error {
+      color: red;
+      margin-bottom: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div id="content"></div>
+  <script>
+    // Define a set of allowed domains.
+    // Both the domain itself and any subdomain are allowed.
+    const allowedDomains = new Set([
+      "kapil.app" // add more allowed domains here in the future
+    ]);
+
+    // Check if the file URL's origin is allowed.
+    function isAllowedOrigin(fileUrl) {
+      try {
+        const url = new URL(fileUrl);
+        const hostname = url.hostname;
+        for (const allowed of allowedDomains) {
+          // Check for an exact match or if the hostname ends with the allowed domain preceded by a dot.
+          if (hostname === allowed || hostname.endsWith("." + allowed)) {
+            return true;
+          }
+        }
+      } catch (e) {
+        return false;
+      }
+      return false;
+    }
+
+    // Basic browser detection: treat Chrome and Firefox as modern.
+    function isModernBrowser() {
+      const ua = navigator.userAgent;
+      if (ua.indexOf("Firefox") > -1) {
+        return true;
+      }
+      if (ua.indexOf("Chrome") > -1 &&
+          ua.indexOf("Edge") === -1 &&
+          ua.indexOf("OPR") === -1) {
+        return true;
+      }
+      return false;
+    }
+
+    // Redirect user preserving the original query parameters.
+    function redirectToViewer() {
+      const query = window.location.search;
+      const viewerPath = isModernBrowser() ? "/web/viewer.html" : "/legacy/web/viewer.html";
+      window.location.href = viewerPath + query;
+    }
+
+    // Render the error/404 page with an input field.
+    function render404(errorMsg) {
+      const container = document.createElement("div");
+      container.className = "container";
+
+      const h1 = document.createElement("h1");
+      h1.textContent = "404 - PDF Not Found";
+      container.appendChild(h1);
+
+      const errorP = document.createElement("p");
+      errorP.className = "error";
+      errorP.textContent = errorMsg || "No PDF file provided.";
+      container.appendChild(errorP);
+
+      const infoP = document.createElement("p");
+      infoP.textContent = "Enter a PDF URL (allowed domains e.g., subdomain.kapil.app):";
+      container.appendChild(infoP);
+
+      const input = document.createElement("input");
+      input.type = "url";
+      input.placeholder = "https://example.kapil.app/path/to/file.pdf";
+      container.appendChild(input);
+
+      const btn = document.createElement("button");
+      btn.textContent = "Load PDF";
+      btn.onclick = function() {
+        const fileUrl = input.value.trim();
+        if (!fileUrl) return;
+        if (!isAllowedOrigin(fileUrl)) {
+          errorP.textContent = "Error: The PDF file's origin is not allowed.";
+          return;
+        }
+        // Redirect by setting the query parameter and using current browser detection.
+        const encodedUrl = encodeURIComponent(fileUrl);
+        window.location.href = (isModernBrowser() ? "/web/viewer.html" : "/legacy/web/viewer.html") + "?file=" + encodedUrl;
+      };
+      container.appendChild(btn);
+
+      document.getElementById("content").innerHTML = "";
+      document.getElementById("content").appendChild(container);
+    }
+
+    // Main logic: Check for file query parameter and allowed origin.
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const fileParam = params.get("file");
+      if (!fileParam) {
+        // No file parameter: render 404 page.
+        render404();
+        return;
+      }
+      const decodedFileUrl = decodeURIComponent(fileParam);
+      if (!isAllowedOrigin(decodedFileUrl)) {
+        render404("Error: The PDF file's origin is not allowed.");
+        return;
+      }
+      // If file parameter exists and origin is allowed, redirect.
+      redirectToViewer();
+    })();
+  </script>
+</body>
+</html>
